@@ -230,7 +230,7 @@ def test(model, loader, dataname, use_gpu=False):
             loss = F.nll_loss(preds, labels)
 
             loss.backward()
-            epsilon = 0.1
+            epsilon = 0.3
             data_grad = inputs.grad.data
             inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
             preds = model(Variable(inputs_adv).cuda())
