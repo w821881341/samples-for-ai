@@ -217,7 +217,9 @@ def test(model, loader, dataname, use_gpu=False):
                 labels = labels.cuda()
                 criterion_f = criterion_f.cuda()
             preds = model(inputs)
+            model.zero_grad()
             loss = criterion_f(preds, labels).squeeze()
+
             loss.backward()
             epsilon = 0.1
             x_grad = torch.sign(inputs.grad.data)
