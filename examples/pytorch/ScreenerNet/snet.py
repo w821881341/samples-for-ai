@@ -214,7 +214,6 @@ def test(model, loader, dataname, use_gpu=False):
             if use_gpu==True:
                 inputs = inputs.cuda()
                 labels = labels.cuda()
-                criterion_f = criterion_f.cuda()
             preds = model(inputs)
             model.zero_grad()
             loss = F.nll_loss(preds, labels)
