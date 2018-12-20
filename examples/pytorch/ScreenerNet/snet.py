@@ -220,7 +220,6 @@ def test(model, loader, dataname, use_gpu=False):
             model.zero_grad()
             loss = criterion_f(preds, labels).squeeze()
 
-            loss.backward()
             epsilon = 0.1
             x_grad = torch.sign(inputs.grad.data)
             inputs_adv = torch.clamp(inputs.data + epsilon * x_grad, 0, 1)
