@@ -219,12 +219,12 @@ def test(model, loader, dataname, use_gpu=False):
         for i, data in enumerate(loader):
             imgs, labels = data
             # imgs_adv = attack(imgs, labels)
-            inputs = Variable(imgs,requires_grad=True)
-            labels = Variable(labels)
-            if use_gpu==True:
-                inputs = inputs.cuda()
-                labels = labels.cuda()
-            inputs.requires_grad = True
+            inputs = Variable(imgs,requires_grad=True).cuda()
+            labels = Variable(labels).cuda()
+
+            # if use_gpu==True:
+            #     inputs = inputs
+            #     labels = labels.cuda()
             preds = model(inputs)
             model.zero_grad()
             loss = F.nll_loss(preds, labels)
