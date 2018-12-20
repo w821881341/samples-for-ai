@@ -52,7 +52,7 @@ def validate(val_loader, model, criterion, epoch):
 
     print('EPOCH {}|Accuracy:{:.3f} |Loss:{:.3f}'.format(epoch, acc.avg, losses.avg))
 
-def train(dataname, max_epoch, no_snet, modelpath=None, download=False, use_gpu=False):
+def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, use_gpu=False):
     savename=modelpath if modelpath else dataname
     if dataname=="mnist":
         modellib = importlib.import_module('snet_mnist')
@@ -90,10 +90,11 @@ def train(dataname, max_epoch, no_snet, modelpath=None, download=False, use_gpu=
             # get the inputs
             inputs, labels = data
             # wrap them in Variable
-            inputs, labels = Variable(inputs), Variable(labels)
             if use_gpu==True:
                 inputs = inputs.cuda()
                 labels = labels.cuda()
+            inputs, labels = Variable(inputs,requires_grad=True), Variable(labels)
+
             # zero the parameter gradients
             optimizer_f.zero_grad()
             # forward + backward + optimize
@@ -103,6 +104,13 @@ def train(dataname, max_epoch, no_snet, modelpath=None, download=False, use_gpu=
                 x_w = snet(inputs).squeeze()
                 loss_w = torch.mean(loss*x_w)
                 loss_w.backward(retain_graph=True)
+                if not not_adv:
+                    epsilon = 0.3
+                    data_grad = inputs.grad.data
+                    inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
+                    outputs_adv = net(Variable(inputs_adv).cuda())
+                    loss_w = criterion_f(outputs_adv, labels).squeeze()
+                    loss_w.backward(retain_graph=True)
                 optimizer_f.step() # update net
 
                 optimizer_s.zero_grad()
@@ -152,7 +160,7 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
-def test(model, loader, dataname, use_gpu=False,not_adv=False):
+def test(model, loader, dataname, use_gpu=False,not_adv):
     model = model.cuda()
     model.eval()
 
@@ -272,7 +280,7 @@ if __name__=='__main__':
     modelpath = os.path.join(args.modelpath, args.modelname)
     if args.phase=="train":
         print("train on {} for {} epoches".format(args.dataname, args.max_epoch))
-        train(args.dataname, args.max_epoch, args.no_snet, modelpath, download=args.download, use_gpu=args.gpu)
+        train(args.dataname, args.max_epoch, args.no_snet,args.not_adv, modelpath, download=args.download, use_gpu=args.gpu)
 
     if args.phase=='test':
         print("test model {} on {}".format(modelpath, args.dataname))
@@ -280,4 +288,4 @@ if __name__=='__main__':
         testloader = modellib.getLoader('test', args.download)
         net, _ = modellib.create_net()
         net.load_state_dict(torch.load(modelpath))
-        test(net, testloader, args.dataname, use_gpu=args.gpu,not_adv=False)
+        test(net, testloader, args.dataname, use_gpu=args.gpu, args.not_adv)
