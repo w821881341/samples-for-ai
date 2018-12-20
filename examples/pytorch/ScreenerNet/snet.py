@@ -229,7 +229,7 @@ def test(model, loader, dataname, use_gpu=False):
             model.zero_grad()
             loss = F.nll_loss(preds, labels)
             print(loss)
-            loss.backward(retain_graph=True)
+            loss.backward(inputs)
             epsilon = 0.1
             print(inputs.grad)
             data_grad = inputs.grad.data
