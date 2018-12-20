@@ -108,7 +108,10 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                     epsilon = 0.3
                     data_grad = inputs.grad.data
                     inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
-                    outputs_adv = net(Variable(inputs_adv).cuda())
+                    inputs_adv = Variable(inputs_adv)
+                    if use_gpu ==True:
+                        inputs_adv = inputs_adv.cuda()
+                    outputs_adv = net(inputs_adv)
                     loss_adv = criterion_f(outputs_adv, labels).squeeze()
                     loss_w_adv = torch.mean(loss_adv * x_w)
                     loss_w_adv.backward(retain_graph=True)
@@ -118,6 +121,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                 loss_s = snet_loss(x_w, loss, snet.parameters(), M, alpha)
                 loss_s.backward()
                 optimizer_s.step()
+
 
                 # print statistics
                 running_loss += loss_w.data[0]
@@ -131,6 +135,16 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
             else:
                 loss = torch.mean(loss)
                 loss.backward()
+                if not not_adv:
+                    epsilon = 0.3
+                    data_grad = inputs.grad.data
+                    inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
+                    inputs_adv = Variable(inputs_adv)
+                    if use_gpu ==True:
+                        inputs_adv = inputs_adv.cuda()
+                    outputs_adv = net(inputs_adv)
+                    loss_adv = criterion_f(outputs_adv, labels).squeeze()
+                    loss_adv.backward(retain_graph=True)
                 optimizer_f.step()
 
                 running_loss += loss.data[0]
@@ -246,7 +260,10 @@ def test(model, loader, dataname, not_adv,use_gpu=False,):
                 epsilon = 0.3
                 data_grad = inputs.grad.data
                 inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
-                preds = model(Variable(inputs_adv).cuda())
+                inputs_adv = Variable(inputs_adv)
+                if use_gpu == True:
+                    inputs_adv = inputs_adv.cuda()
+                preds = model(inputs_adv)
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
