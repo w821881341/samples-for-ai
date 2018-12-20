@@ -152,7 +152,7 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
-def test(model, loader, dataname, use_gpu=False):
+def test(model, loader, dataname, use_gpu=False,not_adv=False):
     model = model.cuda()
     model.eval()
 
@@ -228,14 +228,16 @@ def test(model, loader, dataname, use_gpu=False):
             labels = Variable(labels)
 
             preds = model(inputs)
-            model.zero_grad()
-            loss = F.nll_loss(preds, labels)
 
-            loss.backward()
-            epsilon = 0.3
-            data_grad = inputs.grad.data
-            inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
-            preds = model(Variable(inputs_adv).cuda())
+            if not not_adv:
+                model.zero_grad()
+                loss = F.nll_loss(preds, labels)
+
+                loss.backward()
+                epsilon = 0.3
+                data_grad = inputs.grad.data
+                inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
+                preds = model(Variable(inputs_adv).cuda())
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
@@ -262,6 +264,7 @@ if __name__=='__main__':
     parser.add_argument('--modelpath', help='save dir',  default='.')
     parser.add_argument('--max_epoch', type=int, default=100)
     parser.add_argument('--no_snet', action='store_true')
+    parser.add_argument('--not_adv', action='store_true')
     parser.add_argument('--download', help="switch if you want to download pytorch dataset(only valid for mnist and cifar)", action='store_true')
     parser.add_argument('--gpu', help="train on gpu", action='store_true')
     args = parser.parse_args()
@@ -277,4 +280,4 @@ if __name__=='__main__':
         testloader = modellib.getLoader('test', args.download)
         net, _ = modellib.create_net()
         net.load_state_dict(torch.load(modelpath))
-        test(net, testloader, args.dataname, use_gpu=args.gpu)
+        test(net, testloader, args.dataname, use_gpu=args.gpu,not_adv=False)
