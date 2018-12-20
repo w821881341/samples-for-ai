@@ -140,6 +140,16 @@ def train(dataname, max_epoch, no_snet, modelpath=None, download=False, use_gpu=
         torch.save(snet.state_dict(),'{}_snet.pm'.format(savename))
     print('Finished Training')
 
+def fgsm_attack(image, epsilon, data_grad):
+    # Collect the element-wise sign of the data gradient
+    sign_data_grad = data_grad.sign()
+    # Create the perturbed image by adjusting each pixel of the input image
+    perturbed_image = image + epsilon*sign_data_grad
+    # Adding clipping to maintain [0,1] range
+    perturbed_image = torch.clamp(perturbed_image, 0, 1)
+    # Return the perturbed image
+    return perturbed_image
+
 def test(model, loader, dataname, use_gpu=False):
     model = model.cuda()
     model.eval()
@@ -220,9 +230,9 @@ def test(model, loader, dataname, use_gpu=False):
             print(loss)
             loss.backward()
             epsilon = 0.1
-            x_grad = torch.sign(inputs.grad.data)
-            inputs_adv = torch.clamp(inputs.data + epsilon * x_grad, 0, 1)
-
+            print(inputs.grad)
+            data_grad = inputs.grad.data
+            inputs_adv = fgsm_attack(data, epsilon, data_grad)
             preds = model(Variable(inputs_adv).cuda())
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
