@@ -152,6 +152,7 @@ def test(model, loader, dataname, use_gpu=False):
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
+
             preds = model(inputs)
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
@@ -212,6 +213,7 @@ def test(model, loader, dataname, use_gpu=False):
 
             if use_gpu==True:
                 inputs = inputs.cuda()
+                labels = labels.cuda()
             preds = model(inputs)
             xent = nn.CrossEntropyLoss()
             loss = xent(preds,labels)
