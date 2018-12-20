@@ -108,7 +108,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                     epsilon = 0.3
                     data_grad = inputs.grad.data
                     inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
-                    outputs_adv = net(Variable(inputs_adv).cuda())
+                    outputs_adv = net(inputs_adv)
                     loss_adv = criterion_f(outputs_adv, labels).squeeze()
                     loss_w_adv = torch.mean(loss_adv * x_w)
                     loss_w_adv.backward(retain_graph=True)
