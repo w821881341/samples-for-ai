@@ -206,7 +206,6 @@ def test(model, loader, dataname, use_gpu=False):
         wrong = 0
         # fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 255), num_classes=10)
         # attack = foolbox.attacks.FGSM(fmodel)
-        criterion_f = nn.CrossEntropyLoss()
         for i, data in enumerate(loader):
             imgs, labels = data
             # imgs_adv = attack(imgs, labels)
@@ -218,7 +217,7 @@ def test(model, loader, dataname, use_gpu=False):
                 criterion_f = criterion_f.cuda()
             preds = model(inputs)
             model.zero_grad()
-            loss = criterion_f(preds, labels).squeeze()
+            loss = F.nll_loss(preds, labels)
             print(loss)
             loss.backward()
             epsilon = 0.1
