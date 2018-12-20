@@ -8,6 +8,7 @@ import torchvision
 import collections
 import os.path, os, shutil, importlib
 import numpy as np
+import foolbox
 
 from helpers import AverageMeter, accuracy
 
@@ -36,7 +37,7 @@ def validate(val_loader, model, criterion, epoch):
 
     model.eval()
 
-    for i, (images, target) in enumerate(train_loader):
+    for i, (images, target) in enumerate(val_loader):
         target = target.cuda(async=True)
         image_var=torch.autograd.Variable(images)
         label_var = torch.autograd.Variable(target)
@@ -202,12 +203,14 @@ def test(model, loader, dataname, use_gpu=False):
     elif dataname in ['mnist', 'cifar']:
         correct = 0
         wrong = 0
+        attack = foolbox.attacks.FGSM(model)
         for i, data in enumerate(loader):
             imgs, labels = data
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
-            preds = model(inputs)
+            adversarial = attack(inputs, label)
+            preds = model(adversarial)
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
