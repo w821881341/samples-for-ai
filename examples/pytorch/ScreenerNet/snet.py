@@ -199,11 +199,11 @@ def test(model, loader, dataname, use_gpu=False):
         mmAP = np.mean(np.array(mAP))
         print('mAP:{}\n mAP:{}'.format(mAP,mmAP))
 
-    elif dataname in ['mnist', 'cifar']:
+    elif dataname in ['mnist', 'cifar']
+        correct = 0
+        wrong = 0
         for i, data in enumerate(loader):
             imgs, labels = data
-            correct = 0
-            wrong = 0
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
