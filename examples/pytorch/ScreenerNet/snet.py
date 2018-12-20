@@ -209,7 +209,7 @@ def test(model, loader, dataname, use_gpu=False):
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
-            adversarial = attack(inputs, label)
+            adversarial = attack(inputs, labels)
             preds = model(adversarial)
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
