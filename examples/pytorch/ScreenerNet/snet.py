@@ -213,7 +213,8 @@ def test(model, loader, dataname, use_gpu=False):
             if use_gpu==True:
                 inputs = inputs.cuda()
             preds = model(inputs)
-            loss = nn.CrossEntropyLoss(preds,labels)
+            xent = nn.CrossEntropyLoss()
+            loss = xent(preds,labels)
             loss.backward()
             epsilon = 0.1
             x_grad = torch.sign(inputs.grad.data)
