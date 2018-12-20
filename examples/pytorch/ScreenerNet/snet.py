@@ -208,10 +208,10 @@ def test(model, loader, dataname, use_gpu=False):
         for i, data in enumerate(loader):
             imgs, labels = data
             inputs = Variable(imgs)
+            inputs = attack(inputs, labels)
             if use_gpu==True:
                 inputs = inputs.cuda()
-            adversarial = attack(inputs, labels)
-            preds = model(adversarial)
+            preds = model(inputs)
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
