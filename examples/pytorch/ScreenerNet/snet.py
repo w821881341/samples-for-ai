@@ -203,16 +203,23 @@ def test(model, loader, dataname, use_gpu=False):
     elif dataname in ['mnist', 'cifar']:
         correct = 0
         wrong = 0
-        fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 255), num_classes=10)
-        attack = foolbox.attacks.FGSM(fmodel)
+        # fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 255), num_classes=10)
+        # attack = foolbox.attacks.FGSM(fmodel)
         for i, data in enumerate(loader):
             imgs, labels = data
-            imgs_adv = attack(imgs, labels)
-            inputs = Variable(imgs_adv)
+            # imgs_adv = attack(imgs, labels)
+            inputs = Variable(imgs)
 
             if use_gpu==True:
                 inputs = inputs.cuda()
             preds = model(inputs)
+            loss = nn.CrossEntropyLoss(preds,labels)
+            loss.backward()
+            epsilon = 0.1
+            x_grad = torch.sign(inputs.grad.data)
+            inputs_adv = torch.clamp(inputs.data + epsilon * x_grad, 0, 1)
+
+            preds = model(Variable(inputs_adv).cuda())
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
