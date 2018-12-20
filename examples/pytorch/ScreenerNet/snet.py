@@ -225,8 +225,8 @@ def test(model, loader, dataname, use_gpu=False):
             loss = criterion_f(preds.cpu(), labels).squeeze()
             model.zero_grad()
             loss.backward()
-            data_grad = data.grad.data
-            perturbed_data = fgsm_attack(data, 0.1, data_grad)
+            data_grad = inputs.grad.data
+            perturbed_data = fgsm_attack(inputs, 0.1, data_grad)
 
             preds_adv = model(perturbed_data)
 
