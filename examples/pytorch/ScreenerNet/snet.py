@@ -146,7 +146,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                     outputs_adv = net(inputs_adv)
                     optimizer_f.zero_grad()
                     loss_adv = criterion_f(outputs_adv, labels).squeeze()
-                    print(loss_adv)
+                    loss_adv = torch.mean(loss_adv)
                     loss_adv.backward(retain_graph=True)
                 optimizer_f.step()
 
