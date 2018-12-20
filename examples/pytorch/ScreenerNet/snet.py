@@ -50,16 +50,6 @@ def validate(val_loader, model, criterion, epoch):
 
     print('EPOCH {}|Accuracy:{:.3f} |Loss:{:.3f}'.format(epoch, acc.avg, losses.avg))
 
-def fgsm_attack(image, epsilon, data_grad):
-    # Collect the element-wise sign of the data gradient
-    sign_data_grad = data_grad.sign()
-    # Create the perturbed image by adjusting each pixel of the input image
-    perturbed_image = image + epsilon*sign_data_grad
-    # Adding clipping to maintain [0,1] range
-    perturbed_image = torch.clamp(perturbed_image, 0, 1)
-    # Return the perturbed image
-    return perturbed_image
-
 def train(dataname, max_epoch, no_snet, modelpath=None, download=False, use_gpu=False):
     savename=modelpath if modelpath else dataname
     if dataname=="mnist":
@@ -213,29 +203,19 @@ def test(model, loader, dataname, use_gpu=False):
     elif dataname in ['mnist', 'cifar']:
         correct = 0
         wrong = 0
-        # attack = foolbox.attacks.FGSM(model)
-        criterion_f = nn.CrossEntropyLoss(reduce=False)
+        fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 255), num_classes=10)
+        attack = foolbox.attacks.FGSM(fmodel)
         for i, data in enumerate(loader):
             imgs, labels = data
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
-                criterion_f = criterion_f.cuda()
-            preds = model(inputs)
-            loss = criterion_f(preds.cpu(), labels).squeeze()
-            model.zero_grad()
-            loss.backward()
-            data_grad = inputs.grad.data
-            perturbed_data = fgsm_attack(inputs, 0.1, data_grad)
-
-            preds_adv = model(perturbed_data)
-
+            adversarial = attack(inputs, labels)
+            preds = model(adversarial)
             smax = nn.Softmax()
-            smax_out = smax(preds_adv)[0].cpu()
+            smax_out = smax(preds)[0].cpu()
             probs = smax_out.data.numpy() # get probability
             label = labels[0] # get labels
-
-
 
             idx = np.argmax(probs)
             if idx == label:
