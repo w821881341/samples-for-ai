@@ -171,7 +171,8 @@ def test(model, loader, dataname, use_gpu=False):
             # scores = scores[sorted_args]
             labels = labels[sorted_args]
 
-            correct=0; wrong=0
+            correct=0
+            wrong=0
             precise = []
             K=int(np.sum(labels))
             if K==0:
@@ -201,6 +202,8 @@ def test(model, loader, dataname, use_gpu=False):
     elif dataname in ['mnist', 'cifar']:
         for i, data in enumerate(loader):
             imgs, labels = data
+            correct = 0
+            wrong = 0
             inputs = Variable(imgs)
             if use_gpu==True:
                 inputs = inputs.cuda()
