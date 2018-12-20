@@ -222,7 +222,7 @@ def test(model, loader, dataname, use_gpu=False):
                 inputs = inputs.cuda()
                 criterion_f = criterion_f.cuda()
             preds = model(inputs)
-            loss = criterion_f(preds, labels).squeeze()
+            loss = criterion_f(preds.cpu(), labels).squeeze()
             model.zero_grad()
             loss.backward()
             data_grad = data.grad.data
