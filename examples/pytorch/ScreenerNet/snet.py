@@ -210,7 +210,7 @@ def test(model, loader, dataname, use_gpu=False):
         for i, data in enumerate(loader):
             imgs, labels = data
             # imgs_adv = attack(imgs, labels)
-            inputs = Variable(imgs)
+            inputs = Variable(imgs,requires_grad=True)
             labels = Variable(labels)
             if use_gpu==True:
                 inputs = inputs.cuda()
