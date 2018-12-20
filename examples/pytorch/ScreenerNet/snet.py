@@ -219,21 +219,20 @@ def test(model, loader, dataname, use_gpu=False):
         for i, data in enumerate(loader):
             imgs, labels = data
             # imgs_adv = attack(imgs, labels)
-            inputs = Variable(imgs.cuda(),requires_grad=True)
-            labels = Variable(labels.cuda())
+            if use_gpu==True:
+                imgs = imgs.cuda()
+                labels = labels.cuda()
+            inputs = Variable(imgs,requires_grad=True)
+            labels = Variable(labels)
 
-            # if use_gpu==True:
-            #     inputs = inputs
-            #     labels = labels.cuda()
             preds = model(inputs)
             model.zero_grad()
             loss = F.nll_loss(preds, labels)
-            print(loss)
+
             loss.backward()
             epsilon = 0.1
-            print(inputs.grad)
             data_grad = inputs.grad.data
-            inputs_adv = fgsm_attack(data, epsilon, data_grad)
+            inputs_adv = fgsm_attack(inputs, epsilon, data_grad)
             preds = model(Variable(inputs_adv).cuda())
             smax = nn.Softmax()
             smax_out = smax(preds)[0].cpu()
