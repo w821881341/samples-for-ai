@@ -213,7 +213,7 @@ def test(model, loader, dataname, use_gpu=False):
     elif dataname in ['mnist', 'cifar']:
         correct = 0
         wrong = 0
-        attack = foolbox.attacks.FGSM(model)
+        # attack = foolbox.attacks.FGSM(model)
         criterion_f = nn.CrossEntropyLoss(reduce=False)
         for i, data in enumerate(loader):
             imgs, labels = data
@@ -221,8 +221,7 @@ def test(model, loader, dataname, use_gpu=False):
             if use_gpu==True:
                 inputs = inputs.cuda()
                 criterion_f = criterion_f.cuda()
-            adversarial = attack(inputs, labels)
-            preds = model(adversarial)
+            preds = model(inputs)
             loss = criterion_f(preds, labels).squeeze()
             model.zero_grad()
             loss.backward()
