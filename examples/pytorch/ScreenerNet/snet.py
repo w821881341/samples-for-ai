@@ -134,7 +134,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
 
             else:
                 loss = torch.mean(loss)
-                loss.backward()
+                loss.backward(retain_graph=True)
                 if not not_adv:
                     epsilon = 0.3
                     data_grad = inputs.grad.data
