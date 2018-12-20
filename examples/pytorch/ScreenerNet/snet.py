@@ -207,8 +207,9 @@ def test(model, loader, dataname, use_gpu=False):
         attack = foolbox.attacks.FGSM(fmodel)
         for i, data in enumerate(loader):
             imgs, labels = data
-            inputs = Variable(imgs)
-            inputs = attack(inputs, labels)
+            imgs_adv = attack(imgs, labels)
+            inputs = Variable(imgs_adv)
+
             if use_gpu==True:
                 inputs = inputs.cuda()
             preds = model(inputs)
