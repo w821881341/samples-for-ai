@@ -9,6 +9,8 @@ import collections
 import os.path, os, shutil, importlib
 import numpy as np
 import foolbox
+from tqdm import tqdm
+
 
 from helpers import AverageMeter, accuracy
 
@@ -216,7 +218,7 @@ def test(model, loader, dataname, use_gpu=False):
         wrong = 0
         # fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 255), num_classes=10)
         # attack = foolbox.attacks.FGSM(fmodel)
-        for i, data in enumerate(loader):
+        for i, data in tqdm(enumerate(loader)):
             imgs, labels = data
             # imgs_adv = attack(imgs, labels)
             if use_gpu==True:
