@@ -20,6 +20,6 @@ to see all train and test options.
 
 For example:
 ```
-python snet.py train mnist
+python snet.py train mnist --modename=adv_trained
 python snet.py test mnist --modelname=your_model_name 
 ```

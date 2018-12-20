@@ -160,7 +160,7 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
-def test(model, loader, dataname, use_gpu=False,not_adv):
+def test(model, loader, dataname, not_adv,use_gpu=False,):
     model = model.cuda()
     model.eval()
 
@@ -288,4 +288,4 @@ if __name__=='__main__':
         testloader = modellib.getLoader('test', args.download)
         net, _ = modellib.create_net()
         net.load_state_dict(torch.load(modelpath))
-        test(net, testloader, args.dataname, use_gpu=args.gpu, args.not_adv)
+        test(net, testloader, args.dataname, args.not_adv,use_gpu=args.gpu)
