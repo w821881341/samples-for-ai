@@ -112,6 +112,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                     if use_gpu ==True:
                         inputs_adv = inputs_adv.cuda()
                     outputs_adv = net(inputs_adv)
+                    optimizer_f.zero_grad()
                     loss_adv = criterion_f(outputs_adv, labels).squeeze()
                     loss_w_adv = torch.mean(loss_adv * x_w)
                     loss_w_adv.backward(retain_graph=True)
@@ -143,6 +144,7 @@ def train(dataname, max_epoch, no_snet,not_adv, modelpath=None, download=False, 
                     if use_gpu ==True:
                         inputs_adv = inputs_adv.cuda()
                     outputs_adv = net(inputs_adv)
+                    optimizer_f.zero_grad()
                     loss_adv = criterion_f(outputs_adv, labels).squeeze()
                     loss_adv.backward(retain_graph=True)
                 optimizer_f.step()
